@@ -54,6 +54,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['./src/database/migrations', './src/database/seeders', './.history'],
+    ignores: ['./src/database/migrations', './src/database/seeders'],
   },
 );

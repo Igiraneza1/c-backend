@@ -6,7 +6,21 @@ dist/
 package-lock.json
 coverage/
 logs/
+<<<<<<< HEAD
+<<<<<<< HEAD
+__test__
+<<<<<<< HEAD
+.history
+=======
+__test__
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
+=======
 __test__
 uploads/
 .history
+>>>>>>> fbcfc4f (Chatbot integration and enhancements:)
+=======
+uploads/
+.history
 
+>>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b

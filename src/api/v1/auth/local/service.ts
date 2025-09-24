@@ -336,7 +336,11 @@ export class AuthService {
 
       const { message, stack } = error as Error;
       ResponseService({
+<<<<<<< HEAD
+        data: process.env.NODE_ENV === 'DEV' ? { message, stack } : null,
+=======
         data: process.env.NODE_ENV === 'developement' ? { message, stack } : null,
+>>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
         status: 500,
         success: false,
         message: 'Logout failed - please try again',

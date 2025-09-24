@@ -14,6 +14,10 @@ export const corsOptions: cors.CorsOptions = {
       logger.info('Allowing empty string origin');
       return callback(null, true);
     }
+<<<<<<< HEAD
+    // Check allowed origins
+=======
+>>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
     if (allowedOrigins.includes(origin)) {
       logger.info('Origin allowed:', origin);
       return callback(null, true);

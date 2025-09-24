@@ -28,7 +28,19 @@ services:
       - menyalo-network
 
   postgres:
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
     image: pgvector/pgvector:pg16
+=======
+    image: postgres:16.9-alpine
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
+=======
+    image: pgvector/pgvector:pg16
+>>>>>>> fbcfc4f (Chatbot integration and enhancements:)
+=======
+    image: pgvector/pgvector:pg16
+>>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
     container_name: menyalo_postgres
     env_file:
       - .env.docker
@@ -88,4 +100,12 @@ volumes:
 
 networks:
   menyalo-network:
+<<<<<<< HEAD
+<<<<<<< HEAD
     driver: bridge
+=======
+    driver: bridge
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
+=======
+    driver: bridge
+>>>>>>> fbcfc4f (Chatbot integration and enhancements:)

@@ -2,8 +2,11 @@ import { Sequelize, Model, DataTypes } from 'sequelize';
 import { Role } from './Role';
 import { Profile } from './Profile';
 import { Rating } from './Rating';
+<<<<<<< HEAD
 import { Post } from './Post';
 import { Comment } from './Comment';
+=======
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
 
 interface UserAttributes {
   id: string;
@@ -51,8 +54,11 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     Role: typeof Role;
     Profile: typeof Profile;
     Rating: typeof Rating;
+<<<<<<< HEAD
     Post: typeof Post;
     Comment: typeof Comment;
+=======
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
   }): void {
     User.belongsTo(models.Role, {
       foreignKey: 'roleId',
@@ -67,6 +73,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
       foreignKey: 'userId',
       as: 'ratings',
     });
+<<<<<<< HEAD
 
     User.hasMany(Post, {
       foreignKey: 'authorId',
@@ -76,6 +83,8 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
       foreignKey: 'authorId',
       as: 'comments',
     });
+=======
+>>>>>>> 833906b (Initial MenyaLo backend setup:)
   }
 
   public toJSON(): object | UserAttributes {

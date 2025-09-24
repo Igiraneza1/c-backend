@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { RoleController } from './controller';
 import { authMiddleware } from '../../../middleware/unifiedAuthMiddleware';
+// import { authMiddleware } from '../../../middleware/authMiddleware';
 import { checkRole } from '../../../middleware/ckeckRoleMiddleware';
 import { ValidationMiddleware } from '../../../middleware/validationMiddleware';
 import { createRoleSchema, updateRoleSchema } from './validators';

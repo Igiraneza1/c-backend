@@ -1,10 +1,17 @@
-import { pipeline, FeatureExtractionPipeline, TextGenerationPipeline } from '@xenova/transformers';
+// src/services/AIService.ts
+import {
+  pipeline,
+  FeatureExtractionPipeline,
+  Text2TextGenerationPipeline,
+} from '@xenova/transformers';
 
 // Cache for loaded models with proper typing
 let embeddingModel: FeatureExtractionPipeline | null = null;
-let textModel: TextGenerationPipeline | null = null;
+let textModel: Text2TextGenerationPipeline | null = null;
 
-// Multilingual embedding model - supports 50+ languages
+/**
+ * Generate embeddings for text (multilingual, 50+ languages)
+ */
 export async function getEmbedding(text: string): Promise<number[]> {
   if (!embeddingModel) {
     embeddingModel = (await pipeline(
@@ -21,37 +28,71 @@ export async function getEmbedding(text: string): Promise<number[]> {
   return Array.from(output.data);
 }
 
-export async function generateAnswer(context: string, question: string): Promise<string> {
+/**
+ * Helper: Clean repetitive or messy answers
+ */
+function cleanAnswer(text: string, question?: string): string {
+  let cleaned = text.trim();
+
+  // Take only the first 2–3 sentences
+  const sentences = cleaned.split(/[.!?]\s+/).filter(Boolean);
+  cleaned = sentences.slice(0, 3).join('. ') + '.';
+
+  // Remove duplicate words
+  cleaned = cleaned.replace(/\b(\w+)(\s+\1){1,}\b/gi, '$1');
+
+  // Ensure answer ends with punctuation
+  if (!/[.!?]$/.test(cleaned)) {
+    cleaned = cleaned.replace(/[^.!?]+$/, '').trim();
+  }
+
+  // Fallback if model just repeats the question or returns empty
+  if (!cleaned || (question && cleaned.toLowerCase().includes(question.toLowerCase()))) {
+    cleaned =
+      'The law of Rwanda is defined by its Constitution and related legal codes. It provides the framework for governance, rights, and justice in the country.';
+  }
+
+  return cleaned;
+}
+
+/**
+ * Generate user-friendly answers
+ */
+export async function generateAnswer(
+  context: string,
+  question: string,
+): Promise<string> {
   if (!textModel) {
-    textModel = (await pipeline('text-generation', 'Xenova/gpt2', {
-      quantized: true,
-    })) as TextGenerationPipeline;
+    textModel = (await pipeline(
+      'text2text-generation',
+      'Xenova/flan-t5-small',
+    )) as Text2TextGenerationPipeline;
   }
 
-  let prompt = `Context: ${context}\n\nQuestion: ${question}\n\nAnswer:`;
-
-  const MAX_PROMPT_LENGTH = 1024;
-  if (prompt.length > MAX_PROMPT_LENGTH) {
-    prompt = prompt.slice(-MAX_PROMPT_LENGTH);
-  }
+  // Short, polite prompt
+  const prompt = context
+    ? `Context: ${context}\n\nQuestion: ${question}\n\nAnswer politely in 2–3 short sentences:`
+    : `Question: ${question}\n\nAnswer politely in 2–3 short sentences:`;
 
   const response = await textModel(prompt, {
-    max_new_tokens: 256,
-    temperature: 0.7,
-    do_sample: true,
+    max_new_tokens: 150,
   });
 
-  // Handle different response structures
+  // Extract generated text
+  let generated = '';
   if (Array.isArray(response)) {
-    const generatedText = response[0] as { generated_text: string };
-    return generatedText.generated_text.replace(prompt, '').trim();
+    generated = (response[0] as { generated_text: string }).generated_text;
   } else if (typeof response === 'object' && response !== null) {
-    const generatedText =
+    generated =
       (response as { generated_text?: string }).generated_text ||
       (response as { text?: string }).text ||
       JSON.stringify(response);
-    return generatedText.replace(prompt, '').trim();
   } else {
-    return String(response).replace(prompt, '').trim();
+    generated = String(response);
   }
+
+  // Clean answer before returning
+  const answer = cleanAnswer(generated.replace(prompt, '').trim(), question);
+
+  return answer || 'I’m not sure, but I’ll try to help!';
 }
