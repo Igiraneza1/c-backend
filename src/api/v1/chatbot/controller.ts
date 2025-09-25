@@ -172,7 +172,6 @@ export async function getQueryHistory(req: Request, res: Response): Promise<void
   }
 }
 
-
 export async function getDocuments(req: Request, res: Response): Promise<void> {
   try {
     const result = await Database.database.query<Document>(

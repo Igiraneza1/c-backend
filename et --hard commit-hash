@@ -1,0 +1,52 @@
+[33mc3f3f30[m[33m ([m[1;36mHEAD -> [m[1;32mchatbot[m[33m)[m database update
+[33m7506e32[m Merge branch 'dev' of https://github.com/Solvit-Africa-Training-Center/MenyaLo-Backend into chatbot
+[33m3a196eb[m new commit
+[33mcea6102[m[33m ([m[1;31morigin/dev[m[33m)[m Merge pull request #6 from Solvit-Africa-Training-Center/chatbot
+[33m90977cc[m[33m ([m[1;31morigin/chatbot[m[33m)[m commit
+[33m13fb401[m routes update
+[33mcb2d068[m fixed Dockerfile
+[33ma59bebd[m resolved conflict
+[33mb5fe7c7[m rebased the main branch
+[33ma334fed[m rebased main
+[33m6d931bc[m fixed posts
+[33m3a957e6[m Update .dockerignore
+[33mc9214f5[m Update .dockerignore
+[33mbd7b014[m commit
+[33m1efd478[m commit
+[33m88caee4[m commit
+[33md041c8a[m production solved
+[33m72b477e[m update
+[33mdce1a2a[m error catch
+[33m0fd330d[m production solved
+[33mf182def[m model updatedwith small hugging face
+[33ma3bdedf[m merging
+[33m975dcef[m Initial MenyaLo backend setup: - Added Swagger documentation - Cleaned up __test__ folder - Deployed to Render - Integrated OAuth2 with redirection URI - Rebased main branch - pulled chatbot - Rebased main branch
+[33m59a3cbf[m rebased the main branch
+[33mb656187[m deleted __test__ folder
+[33m77319f7[m deleted __test__ folder
+[33m821c85b[m fixed env variables in render
+[33mb433c63[m removed CORS
+[33ma239428[m added comments
+[33m0c5af72[m commit
+[33m0e7406e[m commit
+[33m85147c2[m commit
+[33m264b520[m production solved
+[33mc69feec[m update
+[33mc58247f[m error catch
+[33m1694099[m production solved
+[33m07ac5b1[m model updatedwith small hugging face
+[33m83374e3[m merging
+[33m419524e[m Initial MenyaLo backend setup: - Added Swagger documentation - Cleaned up __test__ folder - Deployed to Render - Integrated OAuth2 with redirection URI - Rebased main branch
+[33m401c859[m[33m ([m[1;32mdev[m[33m)[m rebased the main branch
+[33mf50097d[m fixed posts
+[33md4c57bb[m deleted __test__ folder
+[33m31af9a6[m deleted __test__ folder
+[33meb9d9b4[m fixed types and validation
+[33m3928516[m added post
+[33m9027846[m changed .env.example
+[33m7fc3cdd[m changed .env.example
+[33m7484f79[m fixed Oauth2 and added redirection URI
+[33m1a7550b[m deploying menyalo-backend on render
+[33me03432b[m deleted __test__ folder
+[33ma4cb0b2[m added swagger
+[33m5e1ac9d[m first commit

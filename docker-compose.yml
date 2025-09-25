@@ -4,20 +4,15 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENV: development
+        ENV: production
     container_name: menyalo
     env_file:
       - .env.docker
     ports:
-      - '5001:5001'
+      - '5001:5000'
     volumes:
       - ./:/usr/src/app/
       - node_modules:/app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
     command: >
       sh -c "
       npm run db:migrate && 
@@ -26,86 +21,9 @@ services:
       "
     networks:
       - menyalo-network
-
-  postgres:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    image: pgvector/pgvector:pg16
-=======
-    image: postgres:16.9-alpine
->>>>>>> 833906b (Initial MenyaLo backend setup:)
-=======
-    image: pgvector/pgvector:pg16
->>>>>>> fbcfc4f (Chatbot integration and enhancements:)
-=======
-    image: pgvector/pgvector:pg16
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
-    container_name: menyalo_postgres
-    env_file:
-      - .env.docker
-    environment:
-      - POSTGRES_PASSWORD=${DEV_PASSWORD}
-      - POSTGRES_DB=${DEV_DATABASE}
-      - POSTGRES_USER=${DEV_USERNAME}
-    ports:
-      - '5432:5432'
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DEV_USERNAME} -d ${DEV_DATABASE}']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - menyalo-network
-
-  redis:
-    image: redis:7
-    container_name: menyalo_redis
-    ports:
-      - '6379:6379'
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - menyalo-network
-
-  pgadmin:
-    image: dpage/pgadmin4:9.8
-    container_name: menyalo_pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admi.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_CONFIG_SERVER_MODE=False
-    ports:
-      - '8080:80'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - menyalo-network
-
 volumes:
-  pgdata:
-  redisdata:
   node_modules:
-  pgadmin_data:
 
 networks:
   menyalo-network:
-<<<<<<< HEAD
-<<<<<<< HEAD
     driver: bridge
-=======
-    driver: bridge
->>>>>>> 833906b (Initial MenyaLo backend setup:)
-=======
-    driver: bridge
->>>>>>> fbcfc4f (Chatbot integration and enhancements:)
