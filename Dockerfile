@@ -1,5 +1,5 @@
 # 1. Use Node.js official image
-FROM node:22.17.0-alpine
+FROM node:18-alpine
 
 # 2. Set working directory inside the container
 WORKDIR /usr/src/app
@@ -9,18 +9,17 @@ COPY package*.json ./
 
 # 4. Install dependencies
 RUN npm install
-RUN npm install typescript
+
 # RUN npx sequelize-cli db:create
 
 # 5. Copy the rest of your project files
 COPY . .
 
-# 6. Set environment variable
-ENV NODE_ENV=development
-ENV PORT=5001
+# 6. compile typescript
+RUN npm run build
 
 # 7. Expose the port (must match PORT in .env)
-EXPOSE 5001
+EXPOSE 5000
 
 # 8. Start the app using your dev script
-CMD ["npm", "run", "dev"]
+CMD ["node", "/usr/src/app/dist/src/server.js"]
