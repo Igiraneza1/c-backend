@@ -1,7 +1,7 @@
-import { answerQuestionLive, scrapeMultipleUrls } from '../chatbot/ScraperService';
+import { answerQuestionLive, scrapeMultipleUrls } from './ScraperService';
 import { getEmbedding, generateAnswer } from './AIservice';
 import { searchDatabase } from './AIservice';
-import { infoLogger } from '../../../utils/logger';
+import { infoLogger } from '../../../../utils/logger';
 
 interface SourceDoc {
   title: string;

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { Database } from '../../../database';
-import { getEmbedding, generateAnswer } from './AIservice';
+import { getEmbedding, generateAnswer } from '../chatbot/service/AIservice';
 import { QueryTypes } from 'sequelize';
 
 function formatEmbeddingForSQL(embedding: number[]): string {
@@ -8,9 +8,8 @@ function formatEmbeddingForSQL(embedding: number[]): string {
 }
 
 export async function processFile(file: Express.Multer.File): Promise<void> {
-  // If multer uses disk storage
+
   const text = fs.readFileSync(file.path, 'utf-8');
-  // If using memoryStorage, replace with: const text = file.buffer.toString('utf-8');
 
   const embedding = await getEmbedding(text);
   const formattedEmbedding = formatEmbeddingForSQL(embedding);
@@ -68,7 +67,6 @@ export async function updateDocument(id: number, content: string): Promise<void>
 }
 
 export async function deleteDocument(id: number): Promise<void> {
-<<<<<<< HEAD
   await Database.database.query(
     'DELETE FROM documents WHERE id = $1 RETURNING *',
     {
@@ -76,10 +74,4 @@ export async function deleteDocument(id: number): Promise<void> {
       type: QueryTypes.SELECT,
     },
   );
-=======
-  await Database.database.query('DELETE FROM documents WHERE id = $1 RETURNING *', {
-    bind: [id],
-    type: QueryTypes.SELECT,
-  });
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
 }

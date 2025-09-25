@@ -2,23 +2,24 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import pdf from 'pdf-parse';
 import { Database } from '../../../database';
-import { getEmbedding, generateAnswer } from './AIservice';
+import { getEmbedding, generateAnswer } from '../chatbot/service/AIservice';
 import { chunkText } from '../../../utils/chunker';
 import { infoLogger, errorLogger } from '../../../utils/logger';
 import { QueryTypes } from 'sequelize';
 import fetch from 'node-fetch';
 
 interface Document {
-  id: number;
-  filename: string;
-  content: string;
-  embedding: number[];
-  created_at: Date;
+  id: number,
+  filename: string,
+  filepath: string,
+  content: string,
+  embedding: number[],
+  created_at: Date,
 }
 
 interface DuckDuckGoResponse {
-  AbstractText?: string;
-  RelatedTopics?: Array<{ Text?: string }>;
+  AbstractText?: string,
+  RelatedTopics?: Array<{ Text?: string }>,
 }
 
 function formatEmbeddingForSQL(embedding: number[]): string {
@@ -30,17 +31,14 @@ async function searchWeb(query: string): Promise<string> {
     const response = await fetch(
       `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`,
     );
-
     const data = (await response.json()) as DuckDuckGoResponse;
 
     if (data?.AbstractText && data.AbstractText.length > 0) {
       return data.AbstractText;
     }
-
     if (data?.RelatedTopics && data.RelatedTopics.length > 0) {
       return data.RelatedTopics[0].Text ?? 'No clear web definition found.';
     }
-
     return 'No clear web definition found.';
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -73,20 +71,22 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
       const embedding = await getEmbedding(chunk);
       const formatted = formatEmbeddingForSQL(embedding);
 
-      const result = await Database.database.query<Document>(
-        'INSERT INTO documents (filename, content, embedding) VALUES ($1, $2, $3::vector) RETURNING *',
-        {
-          bind: [req.file.originalname, chunk, formatted],
-          type: QueryTypes.SELECT,
-        },
-      );
+const result = (await Database.database.query(
+  `INSERT INTO documents (filename, filepath, content, embedding)
+   VALUES ($1, $2, $3, $4::vector)
+   RETURNING *`,
+  {
+    bind: [req.file.originalname, req.file.path, chunk, formatted],
+    type: QueryTypes.SELECT,
+  },
+)) as Document[];
 
       if (result && result.length > 0) {
         inserted.push(result[0]);
       }
     }
 
-    res.status(201).json({ message: 'Uploaded successfully', chunks: inserted });
+    res.status(201).json({ message: 'File uploaded successfully', chunks: inserted });
     infoLogger(
       `Uploaded ${inserted.length} chunks from file ${req.file.originalname}`,
       'uploadDocument',
@@ -120,7 +120,7 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       },
     );
 
-    let context = result.map((r: Document & { distance: number }) => r.content).join('\n---\n');
+    let context = result.map((r) => r.content).join('\n---\n');
     let source: 'database' | 'web' = 'database';
 
     if (!result.length || !context.trim()) {
@@ -172,6 +172,7 @@ export async function getQueryHistory(req: Request, res: Response): Promise<void
   }
 }
 
+
 export async function getDocuments(req: Request, res: Response): Promise<void> {
   try {
     const result = await Database.database.query<Document>(
@@ -216,6 +217,7 @@ export async function updateDocumentById(req: Request, res: Response): Promise<v
 export async function deleteDocumentById(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
+
     const result = await Database.database.query(
       'DELETE FROM documents WHERE id=$1 RETURNING *',
       {

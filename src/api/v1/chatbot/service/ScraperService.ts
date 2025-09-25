@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { getEmbedding, generateAnswer, searchDatabase } from './AIservice';
-import { infoLogger, errorLogger } from '../../../utils/logger';
+import { infoLogger, errorLogger } from '../../../../utils/logger';
 
 interface Law {
   title: string;

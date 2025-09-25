@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { answerQuestionLive} from '../chatbot/ScraperService';
-import { infoLogger, errorLogger } from '../../../utils/logger';
+import { answerQuestionLive} from './ScraperService';
+import { infoLogger, errorLogger } from '../../../../utils/logger';
 
 const router = Router();
 

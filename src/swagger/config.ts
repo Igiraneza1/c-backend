@@ -42,12 +42,4 @@ const options = {
   apis: ['./src/swagger/paths/*.yaml', './src/swagger/schemas/*.yaml'],
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 export const swaggerSpec = swaggerJsdoc(options);
-=======
-export const swaggerSpec = swaggerJsdoc(options);
->>>>>>> 833906b (Initial MenyaLo backend setup:)
-=======
-export const swaggerSpec = swaggerJsdoc(options);
->>>>>>> fbcfc4f (Chatbot integration and enhancements:)
