@@ -87,14 +87,10 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
     }
 
     res.status(201).json({ message: 'Uploaded successfully', chunks: inserted });
-<<<<<<< HEAD
-    infoLogger(`Uploaded ${inserted.length} chunks from file ${req.file.originalname}`, 'uploadDocument');
-=======
     infoLogger(
       `Uploaded ${inserted.length} chunks from file ${req.file.originalname}`,
       'uploadDocument',
     );
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
   } catch (err: unknown) {
     logAndSendError(res, err, 'uploadDocument');
   }
@@ -108,11 +104,9 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // 1️⃣ Generate embedding for the question
     const qEmbedding = await getEmbedding(question);
     const formatted = formatEmbeddingForSQL(qEmbedding);
 
-    // 2️⃣ Search database for relevant document chunks
     const result = await Database.database.query<Document & { distance: number }>(
       `
       SELECT id, content, embedding <#> $1::vector AS distance
@@ -126,17 +120,14 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       },
     );
 
-    // 3️⃣ Prepare context for AI
     let context = result.map((r: Document & { distance: number }) => r.content).join('\n---\n');
     let source: 'database' | 'web' = 'database';
 
-    // 4️⃣ If no relevant context, use web search
     if (!result.length || !context.trim()) {
       context = await searchWeb(question);
       source = 'web';
     }
 
-    // 5️⃣ Build a clean AI prompt to ensure human-friendly answer
     const prompt = `
 You are an AI assistant. Using the context below, answer the question clearly, concisely, and in simple human-friendly language.
 Context: ${context}
@@ -144,10 +135,8 @@ Question: ${question}
 Answer:
     `;
 
-    // 6️⃣ Generate answer
     const answer = await generateAnswer(prompt, question);
 
-    // 7️⃣ Save query & answer to history
     await Database.database.query(
       'INSERT INTO history (question, answer, source) VALUES ($1, $2, $3)',
       {
@@ -156,18 +145,10 @@ Answer:
       },
     );
 
-    // 8️⃣ Send response
     res.json({
-<<<<<<< HEAD
       answer: source === 'web'
         ? `Not found in database. Here’s a web-sourced answer:\n\n${answer}`
         : answer,
-=======
-      answer:
-        source === 'web'
-          ? `Not found in database. Here’s a web-sourced answer:\n\n${answer}`
-          : answer,
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
       documents: result,
       source,
     });
@@ -180,16 +161,10 @@ Answer:
 
 export async function getQueryHistory(req: Request, res: Response): Promise<void> {
   try {
-<<<<<<< HEAD
     const result = await Database.database.query(
       'SELECT * FROM history ORDER BY created_at DESC',
       { type: QueryTypes.SELECT },
     );
-=======
-    const result = await Database.database.query('SELECT * FROM history ORDER BY created_at DESC', {
-      type: QueryTypes.SELECT,
-    });
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
     res.json(result);
     infoLogger('Fetched query history', 'getQueryHistory');
   } catch (err: unknown) {
@@ -197,7 +172,6 @@ export async function getQueryHistory(req: Request, res: Response): Promise<void
   }
 }
 
-// -------------------- Get All Documents --------------------
 export async function getDocuments(req: Request, res: Response): Promise<void> {
   try {
     const result = await Database.database.query<Document>(
@@ -211,7 +185,6 @@ export async function getDocuments(req: Request, res: Response): Promise<void> {
   }
 }
 
-// -------------------- Update Document --------------------
 export async function updateDocumentById(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
@@ -240,11 +213,9 @@ export async function updateDocumentById(req: Request, res: Response): Promise<v
   }
 }
 
-// -------------------- Delete Document --------------------
 export async function deleteDocumentById(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
-<<<<<<< HEAD
     const result = await Database.database.query(
       'DELETE FROM documents WHERE id=$1 RETURNING *',
       {
@@ -252,12 +223,6 @@ export async function deleteDocumentById(req: Request, res: Response): Promise<v
         type: QueryTypes.SELECT,
       },
     );
-=======
-    const result = await Database.database.query('DELETE FROM documents WHERE id=$1 RETURNING *', {
-      bind: [id],
-      type: QueryTypes.SELECT,
-    });
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
 
     if (!result || result.length === 0) {
       res.status(404).json({ error: 'Document not found' });

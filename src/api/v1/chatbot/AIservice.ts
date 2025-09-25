@@ -1,16 +1,17 @@
-// src/services/AIService.ts
 import {
   pipeline,
   FeatureExtractionPipeline,
   Text2TextGenerationPipeline,
 } from '@xenova/transformers';
+import { Database } from '../../../database/index';
+import { QueryTypes } from 'sequelize';
 
-// Cache for loaded models with proper typing
+// Cache for loaded models
 let embeddingModel: FeatureExtractionPipeline | null = null;
 let textModel: Text2TextGenerationPipeline | null = null;
 
 /**
- * Generate embeddings for text (multilingual, 50+ languages)
+ * Generate embeddings for text
  */
 export async function getEmbedding(text: string): Promise<number[]> {
   if (!embeddingModel) {
@@ -29,24 +30,60 @@ export async function getEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Helper: Clean repetitive or messy answers
+ * Define DB result type
  */
+interface LawRow {
+  id?: number;
+  title?: string;
+  content: string;
+  similarity: number;
+}
+
+/**
+ * Retrieve top N most relevant law sections from DB
+ */
+export async function retrieveContext(
+  question: string,
+  topK = 3,
+): Promise<string> {
+  const questionEmbedding = await getEmbedding(question);
+
+  const rows = (await Database.database.query(
+    `
+    SELECT id, title, content, 1 - (embedding <=> CAST(:embedding AS vector)) AS similarity
+    FROM laws
+    ORDER BY embedding <=> CAST(:embedding AS vector)
+    LIMIT :topK
+    `,
+    {
+      replacements: { embedding: questionEmbedding, topK },
+      type: QueryTypes.SELECT,
+    },
+  )) as LawRow[];
+
+  if (!rows.length) {
+    return '';
+  }
+
+  return rows.map(r => `(${r.title ?? 'Law'}) ${r.content}`).join('\n\n');
+}
+
 function cleanAnswer(text: string, question?: string): string {
   let cleaned = text.trim();
 
-  // Take only the first 2–3 sentences
+  // Take first 2–3 sentences
   const sentences = cleaned.split(/[.!?]\s+/).filter(Boolean);
   cleaned = sentences.slice(0, 3).join('. ') + '.';
 
   // Remove duplicate words
   cleaned = cleaned.replace(/\b(\w+)(\s+\1){1,}\b/gi, '$1');
 
-  // Ensure answer ends with punctuation
+  // Ensure punctuation
   if (!/[.!?]$/.test(cleaned)) {
-    cleaned = cleaned.replace(/[^.!?]+$/, '').trim();
+    cleaned += '.';
   }
 
-  // Fallback if model just repeats the question or returns empty
+  // Fallback if empty or repeats question
   if (!cleaned || (question && cleaned.toLowerCase().includes(question.toLowerCase()))) {
     cleaned =
       'The law of Rwanda is defined by its Constitution and related legal codes. It provides the framework for governance, rights, and justice in the country.';
@@ -55,9 +92,6 @@ function cleanAnswer(text: string, question?: string): string {
   return cleaned;
 }
 
-/**
- * Generate user-friendly answers
- */
 export async function generateAnswer(
   context: string,
   question: string,
@@ -69,16 +103,23 @@ export async function generateAnswer(
     )) as Text2TextGenerationPipeline;
   }
 
-  // Short, polite prompt
-  const prompt = context
-    ? `Context: ${context}\n\nQuestion: ${question}\n\nAnswer politely in 2–3 short sentences:`
-    : `Question: ${question}\n\nAnswer politely in 2–3 short sentences:`;
+  const prompt = `
+You are an AI legal assistant for Rwanda laws.
+Answer clearly, in plain language, and cite relevant articles.
+
+Context:
+${context || 'No relevant law found.'}
+
+Question:
+${question}
+
+Answer politely in 2–3 short sentences with a reference to the law:
+`;
 
   const response = await textModel(prompt, {
     max_new_tokens: 150,
   });
 
-  // Extract generated text
   let generated = '';
   if (Array.isArray(response)) {
     generated = (response[0] as { generated_text: string }).generated_text;
@@ -91,8 +132,17 @@ export async function generateAnswer(
     generated = String(response);
   }
 
-  // Clean answer before returning
   const answer = cleanAnswer(generated.replace(prompt, '').trim(), question);
 
-  return answer || 'I’m not sure, but I’ll try to help!';
+  return (
+    answer +
+    '\n\nDisclaimer: This is a simplified summary. For legal advice, consult a qualified lawyer.'
+  );
+}
+
+export async function searchDatabase(
+  question: string,
+  topK = 3,
+): Promise<string> {
+  return retrieveContext(question, topK);
 }

@@ -20,7 +20,6 @@ if (!fs.existsSync(uploadsDir)) {
   infoLogger(`Uploads directory created: ${uploadsDir}`, 'routes');
 }
 
-// Multer configuration for up to 10 PDF files
 const upload = multer({
   dest: uploadsDir,
   limits: {

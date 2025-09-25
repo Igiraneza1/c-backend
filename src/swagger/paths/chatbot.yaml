@@ -8,29 +8,14 @@ paths:
     post:
       tags:
         - Documents
-<<<<<<< HEAD
       summary: Upload documents for RAG
       description: Upload one or more files to be stored and embedded for retrieval-augmented generation (RAG).
-=======
-      summary: Upload a document for RAG
-      description: Upload a file to be stored and embedded for retrieval-augmented generation (RAG).
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
-<<<<<<< HEAD
-              properties:
-                files:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: "Upload multiple PDF files"
-
-=======
               required:
                 - file
               properties:
@@ -40,7 +25,6 @@ paths:
                 filename:
                   type: string
                   description: Optional filename to override original
->>>>>>> cb2d068b796c5b8f0f3685957322117daa71783b
       responses:
         '201':
           description: File uploaded and processed successfully
