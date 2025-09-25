@@ -18,10 +18,8 @@ export async function answerQuestionHybrid(question: string): Promise<string> {
     'https://www.rwandagazette.gov.rw/laws/page2',
   ]);
 
-  // Fix: Convert string results to SourceDoc objects
   const allDocs: SourceDoc[] = [];
-  
-  // Process dbDocs - if it returns strings, convert to SourceDoc
+
   if (Array.isArray(dbDocs)) {
     dbDocs.forEach(doc => {
       if (typeof doc === 'string') {
@@ -32,7 +30,6 @@ export async function answerQuestionHybrid(question: string): Promise<string> {
     });
   }
   
-  // Process scrapedDocs - if it returns strings, convert to SourceDoc
   if (Array.isArray(scrapedDocs)) {
     scrapedDocs.forEach(doc => {
       if (typeof doc === 'string') {
@@ -44,7 +41,7 @@ export async function answerQuestionHybrid(question: string): Promise<string> {
   }
 
   if (!allDocs.length) {
-    // Fix: Now using answerQuestionLive
+    
     return answerQuestionLive(question);
   }
 

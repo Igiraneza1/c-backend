@@ -11,7 +11,6 @@ router.post('/ask-live', async (req, res) => {
     return res.status(400).json({ error: 'Question is required and must be a string' });
   }
 
-  // Validate URLs
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
     return res.status(400).json({ error: 'URLs are required and must be a non-empty array' });
   }
