@@ -27,7 +27,7 @@ const swaggerDefinition: SwaggerDefinition = {
     },
 
     {
-      url: 'https://c-backend-12.onrender.com',
+      url: 'https://c-backend-13.onrender.com',
       description: 'AI chatbot',
     },
   ],

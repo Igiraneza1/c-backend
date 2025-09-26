@@ -4,6 +4,6 @@ export const allowedOrigins = [
   'http://localhost:5001',
   'http://localhost:5000',
   'http://localhost:5173',
-  'https://c-backend-12.onrender.com',
+  'https://c-backend-13.onrender.com',
   
 ];
