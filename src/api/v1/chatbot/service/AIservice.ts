@@ -1,41 +1,61 @@
-import {
-  pipeline,
+// src/api/v1/chatbot/service/AIservice.ts
+import { Database } from '../../../../database/index.js';
+import { QueryTypes } from 'sequelize';
+import type {
   FeatureExtractionPipeline,
   Text2TextGenerationPipeline,
+  PipelineType,
 } from '@xenova/transformers';
-import { Database } from '../../../../database/index';
-import { QueryTypes } from 'sequelize';
 
 let embeddingModel: FeatureExtractionPipeline | null = null;
 let textModel: Text2TextGenerationPipeline | null = null;
 
+/**
+ * Load the @xenova/transformers pipeline dynamically
+ */
+async function loadPipeline<T extends PipelineType>(
+  type: T,
+  model: string,
+): Promise<
+  T extends 'feature-extraction'
+    ? FeatureExtractionPipeline
+    : T extends 'text2text-generation'
+    ? Text2TextGenerationPipeline
+    : unknown
+> {
+  const { pipeline } = await import('@xenova/transformers');
+
+  // Type assertion instead of `any`
+  return (await pipeline(type, model)) as T extends 'feature-extraction'
+    ? FeatureExtractionPipeline
+    : T extends 'text2text-generation'
+    ? Text2TextGenerationPipeline
+    : unknown;
+}
+
+/**
+ * Generate embedding for a given text
+ */
 export async function getEmbedding(text: string): Promise<number[]> {
   if (!embeddingModel) {
-    embeddingModel = (await pipeline(
-      'feature-extraction',
-      'Xenova/paraphrase-multilingual-MiniLM-L12-v2',
-    )) as FeatureExtractionPipeline;
+    embeddingModel = await loadPipeline('feature-extraction', 'Xenova/paraphrase-multilingual-MiniLM-L12-v2');
   }
 
-  const output = await embeddingModel(text, {
-    pooling: 'mean',
-    normalize: true,
-  });
-
+  const output = await embeddingModel(text, { pooling: 'mean', normalize: true });
   return Array.from(output.data);
 }
 
 interface LawRow {
-  id?: number;
-  title?: string;
-  content: string;
-  similarity: number;
+  id?: number,
+  title?: string,
+  content: string,
+  similarity: number,
 }
 
-export async function retrieveContext(
-  question: string,
-  topK = 3,
-): Promise<string> {
+/**
+ * Retrieve top-k similar laws from the database
+ */
+export async function retrieveContext(question: string, topK = 3): Promise<string> {
   const questionEmbedding = await getEmbedding(question);
 
   const rows = (await Database.database.query(
@@ -51,13 +71,16 @@ export async function retrieveContext(
     },
   )) as LawRow[];
 
-  if (!rows.length) {
+  if (rows.length === 0) {
     return '';
   }
 
   return rows.map(r => `(${r.title ?? 'Law'}) ${r.content}`).join('\n\n');
 }
 
+/**
+ * Clean and summarize AI-generated text
+ */
 function cleanAnswer(text: string, question?: string): string {
   let cleaned = text.trim();
 
@@ -78,15 +101,12 @@ function cleanAnswer(text: string, question?: string): string {
   return cleaned;
 }
 
-export async function generateAnswer(
-  context: string,
-  question: string,
-): Promise<string> {
+/**
+ * Generate AI answer from context + question
+ */
+export async function generateAnswer(context: string, question: string): Promise<string> {
   if (!textModel) {
-    textModel = (await pipeline(
-      'text2text-generation',
-      'Xenova/flan-t5-small',
-    )) as Text2TextGenerationPipeline;
+    textModel = await loadPipeline('text2text-generation', 'Xenova/flan-t5-small');
   }
 
   const prompt = `
@@ -102,9 +122,7 @@ ${question}
 Answer politely in 2–3 short sentences with a reference to the law:
 `;
 
-  const response = await textModel(prompt, {
-    max_new_tokens: 150,
-  });
+  const response = await textModel(prompt, { max_new_tokens: 150 });
 
   let generated = '';
   if (Array.isArray(response)) {
@@ -126,9 +144,9 @@ Answer politely in 2–3 short sentences with a reference to the law:
   );
 }
 
-export async function searchDatabase(
-  question: string,
-  topK = 3,
-): Promise<string> {
+/**
+ * Wrapper to search database only
+ */
+export async function searchDatabase(question: string, topK = 3): Promise<string> {
   return retrieveContext(question, topK);
 }
