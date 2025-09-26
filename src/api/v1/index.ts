@@ -14,7 +14,7 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/subscribers', subscriptionRoutes);
 router.use('/posts', postRoutes);
-router.use('/chatbot', chatbotRoutes);
-router.use('/posts', commentRoutes);
+router.use('/documents', chatbotRoutes);
+router.use('/comments', commentRoutes);
 
 export default router;

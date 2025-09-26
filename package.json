@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/server.js",
-    "dev": "ts-node src/server.ts",
+    "dev": "nodemon",
     "test": "jest",
     "test:watch": "jest --watch",
     "db:migrate": "sequelize-cli db:migrate",

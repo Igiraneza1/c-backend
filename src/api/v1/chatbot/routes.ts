@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import cors from 'cors';
 import {
   uploadDocument,
   queryDocument,
@@ -10,9 +11,10 @@ import {
   deleteDocumentById,
   getQueryHistory,
 } from './controller';
-import { infoLogger } from '../../../utils/logger'; 
+import { infoLogger } from '../../../utils/logger';
 
 const router = Router();
+router.use(cors()); 
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -23,7 +25,7 @@ if (!fs.existsSync(uploadsDir)) {
 const upload = multer({
   dest: uploadsDir,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB per file
+    fileSize: 100 * 1024 * 1024, // 100MB
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {

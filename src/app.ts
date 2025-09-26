@@ -30,7 +30,7 @@ export const createServer = (): Express => {
   app.use(express.json());
   app.use(cors(corsOptions));
   app.use(helmet());
-
+ 
   app.set('views', 'views');
   app.set('view engine', 'ejs');
 

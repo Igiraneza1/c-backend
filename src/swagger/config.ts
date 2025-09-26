@@ -25,6 +25,11 @@ const swaggerDefinition: SwaggerDefinition = {
       url: 'https://menyalo-backend.onrender.com/api/v1', // Added /api/v1
       description: 'Production server on Render',
     },
+
+    {
+      url: 'https://c-backend-12.onrender.com',
+      description: 'AI chatbot',
+    },
   ],
   components: {
     securitySchemes: {
