@@ -1,13 +1,11 @@
 # 1. Use Node.js official image
-FROM node:20-slim
+FROM node:18-alpine
 
 # 2. Set working directory inside the container
 WORKDIR /usr/src/app
 
 # 3. Copy package.json and package-lock.json first for caching
-
 COPY package*.json ./
-RUN npm ci --only=production
 
 # 4. Install dependencies
 RUN npm install
