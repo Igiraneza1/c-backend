@@ -13,18 +13,18 @@ const swaggerDefinition: SwaggerDefinition = {
     },
   },
   servers: [
-    {
-      url: 'http://localhost:5001/api/v1',
-      description: 'Development server',
-    },
-    {
-      url: 'http://localhost:5000/api/v1',
-      description: 'Alternative development server',
-    },
-    {
-      url: 'https://menyalo-backend.onrender.com/api/v1', // Added /api/v1
-      description: 'Production server on Render',
-    },
+    // {
+    //   url: 'http://localhost:5001/api/v1',
+    //   description: 'Development server',
+    // },
+    // {
+    //   url: 'http://localhost:5000/api/v1',
+    //   description: 'Alternative development server',
+    // },
+    // {
+    //   url: 'https://menyalo-backend.onrender.com/api/v1', // Added /api/v1
+    //   description: 'Production server on Render',
+    // },
 
     {
       url: 'https://c-backend-13.onrender.com/api/v1',
