@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import fs from 'fs';
+import fs from 'fs/promises';
 import pdf from 'pdf-parse';
 import { Database } from '../../../database';
 import { getEmbedding, generateAnswer } from '../chatbot/service/AIservice';
@@ -60,7 +60,7 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
       return;
     }
 
-    const pdfBuffer = fs.readFileSync(req.file.path);
+    const pdfBuffer = await fs.readFile(req.file.path);
     const pdfData = await pdf(pdfBuffer);
     const cleanText = pdfData.text.replace(/\s+/g, ' ').trim();
     const chunks = chunkText(cleanText, 1000, 100);
@@ -108,7 +108,7 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       `SELECT id, content, embedding <#> $1::vector AS distance
        FROM documents
        ORDER BY distance
-       LIMIT 3`,
+       LIMIT 3`, 
       {
         bind: [formatted],
         type: QueryTypes.SELECT,
@@ -119,13 +119,16 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
     let source: 'database' | 'web' = 'database';
 
     if (!result.length || !context.trim()) {
-      context = await searchWeb(question);
+      context = await searchWeb(question); 
       source = 'web';
     }
 
+    const contextChunks = context.split('\n---\n').slice(0, 3); 
+    const limitedContext = contextChunks.join('\n---\n');
+
     const prompt = `
 You are an AI assistant. Using the context below, answer the question clearly, concisely, and in simple human-friendly language.
-Context: ${context}
+Context: ${limitedContext}
 Question: ${question}
 Answer:
     `;
@@ -153,6 +156,7 @@ Answer:
     logAndSendError(res, err, 'queryDocument');
   }
 }
+
 
 export async function getQueryHistory(req: Request, res: Response): Promise<void> {
   try {

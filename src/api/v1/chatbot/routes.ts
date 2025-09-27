@@ -17,7 +17,7 @@ const router = Router();
 router.use(cors()); 
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
+if (fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   infoLogger(`Uploads directory created: ${uploadsDir}`, 'routes');
 }
