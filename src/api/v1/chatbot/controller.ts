@@ -60,13 +60,22 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
       return;
     }
 
+    // -------------------------------
+    // Read PDF asynchronously (memory safe)
+    // -------------------------------
     const pdfBuffer = await fs.readFile(req.file.path);
     const pdfData = await pdf(pdfBuffer);
     const cleanText = pdfData.text.replace(/\s+/g, ' ').trim();
-    const chunks = chunkText(cleanText, 1000, 100);
 
+    // -------------------------------
+    // Split text into smaller chunks
+    // -------------------------------
+    const chunks = chunkText(cleanText, 1000, 100);
     const inserted: InsertedDocument[] = [];
 
+    // -------------------------------
+    // Process embeddings sequentially (avoid memory spike)
+    // -------------------------------
     for (const chunk of chunks) {
       const embedding = await getEmbedding(chunk);
       const formatted = formatEmbeddingForSQL(embedding);
@@ -86,8 +95,11 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
       }
     }
 
+    await fs.unlink(req.file.path);
+
     res.status(201).json({ message: 'File uploaded successfully', chunks: inserted });
     infoLogger(`Uploaded ${inserted.length} chunks from file ${req.file.originalname}`, 'uploadDocument');
+
   } catch (err) {
     logAndSendError(res, err, 'uploadDocument');
   }
@@ -108,7 +120,7 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       `SELECT id, content, embedding <#> $1::vector AS distance
        FROM documents
        ORDER BY distance
-       LIMIT 3`, 
+       LIMIT 3`,
       {
         bind: [formatted],
         type: QueryTypes.SELECT,
@@ -123,7 +135,7 @@ export async function queryDocument(req: Request, res: Response): Promise<void> 
       source = 'web';
     }
 
-    const contextChunks = context.split('\n---\n').slice(0, 3); 
+    const contextChunks = context.split('\n---\n').slice(0, 3); // only top 3 chunks
     const limitedContext = contextChunks.join('\n---\n');
 
     const prompt = `
