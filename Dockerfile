@@ -1,23 +1,25 @@
-# 1. Use Debian-based Node.js image (has glibc)
-FROM node:18-bullseye-slim
+# 1. Use Node.js official image
+FROM node:18-alpine
 
-# 2. Set working directory
+# 2. Set working directory inside the container
 WORKDIR /usr/src/app
 
-# 3. Copy package.json and package-lock.json
+# 3. Copy package.json and package-lock.json first for caching
 COPY package*.json ./
 
 # 4. Install dependencies
 RUN npm install
 
+# RUN npx sequelize-cli db:create
+
 # 5. Copy the rest of your project files
 COPY . .
 
-# 6. Compile TypeScript
+# 6. compile typescript
 RUN npm run build
 
-# 7. Expose port
+# 7. Expose the port (must match PORT in .env)
 EXPOSE 5000
 
-# 8. Start the app
-CMD ["node", "dist/src/server.js"]
+# 8. Start the app using your dev script
+CMD ["node", "/usr/src/app/dist/src/server.js"]
