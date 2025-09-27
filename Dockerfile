@@ -1,33 +1,23 @@
-# 1. Use Node.js official Alpine image
-FROM node:18-alpine
+# 1. Use Debian-based Node.js image (has glibc)
+FROM node:18-bullseye-slim
 
-# 2. Set working directory inside the container
+# 2. Set working directory
 WORKDIR /usr/src/app
 
-# 3. Install glibc (required by onnxruntime-node)
-RUN apk add --no-cache libc6-compat curl \
-    && curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk -o glibc.apk \
-    && apk add --no-cache --allow-untrusted glibc.apk \
-    && rm glibc.apk
-
-
-# Optional: install build tools in case we need to rebuild onnxruntime-node
-RUN apk add --no-cache python3 make g++ bash
-
-# 4. Copy package.json and package-lock.json first for caching
+# 3. Copy package.json and package-lock.json
 COPY package*.json ./
 
-# 5. Install dependencies
+# 4. Install dependencies
 RUN npm install
 
-# 6. Copy the rest of your project files
+# 5. Copy the rest of your project files
 COPY . .
 
-# 7. Compile TypeScript
+# 6. Compile TypeScript
 RUN npm run build
 
-# 8. Expose the port (must match PORT in .env)
+# 7. Expose port
 EXPOSE 5000
 
-# 9. Start the app
-CMD ["node", "/usr/src/app/dist/src/server.js"]
+# 8. Start the app
+CMD ["node", "dist/src/server.js"]
